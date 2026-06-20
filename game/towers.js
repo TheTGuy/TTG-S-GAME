@@ -5,12 +5,12 @@ export const TOWER_DEFS = {
   machinegun:  { name:'Machine Gun', cost:75,  color:'#446', accentColor:'#88a', range:2.5, damage:12,  rate:0.25, proj:'bullet',  aoe:0,    slow:0,    desc:'Rapid fire, shreds fast enemies' },
   sniper:      { name:'Sniper',      cost:125, color:'#354', accentColor:'#6a8', range:7,   damage:150, rate:2.5,  proj:'laser',   aoe:0,    slow:0,    desc:'Extreme range and damage' },
   freeze:      { name:'Freeze',      cost:90,  color:'#3af', accentColor:'#8df', range:3,   damage:0,   rate:1.5,  proj:'freeze',  aoe:1,    slow:0.5,  desc:'Slows all enemies in range' },
-  flamethrower:{ name:'Flamethrower',cost:110, color:'#a42', accentColor:'#f84', range:2.2, damage:20,  rate:0.15, proj:'flame',   aoe:0,    slow:0,    desc:'Cone AOE, continuous damage' },
+  flamethrower:{ name:'Flamethrower',cost:110, color:'#a42', accentColor:'#f84', range:2.2, damage:20,  rate:0.15, proj:'flame',   aoe:1,    slow:0,    desc:'Cone AOE, continuous damage' },
   tesla:       { name:'Tesla',       cost:140, color:'#84f', accentColor:'#ccf', range:3.2, damage:35,  rate:1,    proj:'chain',   aoe:0,    slow:0,    desc:'Chain lightning between enemies' },
   mortar:      { name:'Mortar',      cost:150, color:'#643', accentColor:'#a86', range:5,   damage:80,  rate:2.8,  proj:'shell',   aoe:1.5,  slow:0,    desc:'Lob shells, AOE splash' },
   laser:       { name:'Laser',       cost:160, color:'#f44', accentColor:'#f88', range:6,   damage:25,  rate:0.1,  proj:'beam',    aoe:0,    slow:0,    desc:'Continuous beam, pierces enemies' },
   poison:      { name:'Poison',      cost:95,  color:'#4a4', accentColor:'#8f8', range:3,   damage:8,   rate:1,    proj:'poison',  aoe:0,    slow:0,    desc:'DOT damage over time' },
-  airstrike:   { name:'Airstrike',   cost:200, color:'#448', accentColor:'#88f', range:99,  damage:300, rate:20,   proj:'bomb',    aoe:3,    slow:0,    desc:'Global cooldown bombing run' }
+  airstrike:   { name:'Airstrike',   cost:200, color:'#448', accentColor:'#88f', range:99,  damage:300, rate:5,   proj:'bomb',    aoe:3,    slow:0,    desc:'Global cooldown bombing run' }
 };
 
 export class Tower {
@@ -46,7 +46,11 @@ export class Tower {
     if (!t) return;
     this.target = t;
     const dx = t.x - this.x, dy = t.y - this.y;
-    this.angle = Math.atan2(dy, dx);
+    const targetAngle = Math.atan2(dy, dx);
+    let diff = targetAngle - this.angle;
+    while (diff > Math.PI) diff -= Math.PI * 2;
+    while (diff < -Math.PI) diff += Math.PI * 2;
+    this.angle += diff * 0.18;
     projectiles.push(this.createProjectile(t));
     this.cooldown = this.rate;
   }
