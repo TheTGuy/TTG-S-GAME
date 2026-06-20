@@ -1,4 +1,4 @@
-const WORKER_URL = 'https://your-worker.your-name.workers.dev';
+const WORKER_URL = 'frosty-meadow-215a.attempt2025.workers.dev';
 
 export async function getWaveData(waveNum, playerStats) {
   try {
