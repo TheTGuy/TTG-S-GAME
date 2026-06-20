@@ -1,5 +1,17 @@
 import { TOWER_DEFS } from './towers.js';
 
+let tooltip = null;
+
+function getTooltip() {
+  if (!tooltip) {
+    tooltip = document.createElement('div');
+    tooltip.id = 'tower-tooltip';
+    tooltip.style.cssText = 'position:fixed;background:#1a1a1a;border:1px solid #444;border-radius:5px;padding:8px 10px;font-size:0.76rem;color:#ddd;pointer-events:none;display:none;z-index:999;line-height:1.7;min-width:140px;';
+    document.body.appendChild(tooltip);
+  }
+  return tooltip;
+}
+
 export function buildTowerPanel(container, onSelect, getGold) {
   container.innerHTML = '';
   for (const [key, def] of Object.entries(TOWER_DEFS)) {
@@ -15,8 +27,26 @@ export function buildTowerPanel(container, onSelect, getGold) {
     const cv = btn.querySelector('canvas');
     drawTowerIcon(cv, def);
     btn.addEventListener('click', () => onSelect(key));
+
+    btn.addEventListener('mouseenter', (e) => {
+      const tt = getTooltip();
+      const reloadTime = def.rate === 0.1 ? 'Continuous' : def.rate >= 20 ? '20s cooldown' : def.rate.toFixed(1) + 's reload';
+      const dmgText = def.damage === 0 ? 'No damage' : def.damage + (def.aoe ? ' (AOE)' : '');
+      tt.innerHTML = `<b>${def.name}</b><br>💰 ${def.cost}<br>⚔️ ${dmgText}<br>🔄 ${reloadTime}<br>📏 Range: ${def.range}<br><span style="color:#888">${def.desc}</span>`;
+      tt.style.display = 'block';
+      positionTooltip(tt, e);
+    });
+
+    btn.addEventListener('mousemove', (e) => positionTooltip(getTooltip(), e));
+    btn.addEventListener('mouseleave', () => { getTooltip().style.display = 'none'; });
+
     container.appendChild(btn);
   }
+}
+
+function positionTooltip(tt, e) {
+  tt.style.left = (e.clientX - 160) + 'px';
+  tt.style.top = (e.clientY - 10) + 'px';
 }
 
 export function refreshTowerPanel(container, selectedType, gold) {
@@ -30,11 +60,12 @@ export function refreshTowerPanel(container, selectedType, gold) {
 export function showTowerInfo(panel, tower, onUpgrade, onSell) {
   panel.classList.remove('hidden');
   const def = tower.def;
+  const reloadText = def.rate >= 20 ? '20s cooldown' : (1/tower.rate).toFixed(1) + '/s';
   panel.querySelector('.ti-name').textContent = `${def.name} (Lv${tower.level})`;
   panel.querySelector('.ti-stats').innerHTML =
-    `Range: ${(tower.def.range * (1 + (tower.level-1)*0.15)).toFixed(1)}<br>` +
+    `Range: ${(def.range * (1 + (tower.level-1)*0.15)).toFixed(1)}<br>` +
     `Damage: ${Math.floor(tower.damage)}<br>` +
-    `Fire rate: ${(1/tower.rate).toFixed(1)}/s<br>` +
+    `Fire rate: ${reloadText}<br>` +
     `${def.desc}`;
   const upBtn = panel.querySelector('.ti-upgrade');
   const maxed = tower.level >= tower.maxLevel;
