@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tower Defense — TTG's Games</title>
+<link rel="stylesheet" href="ui.css">
+</head>
+<body>
+<div id="screen-menu" class="screen active">
+  <div class="menu-inner">
+    <a href="../index.html" class="back-link">← TTG's Games</a>
+    <h1>Tower Defense</h1>
+    <p class="menu-sub">Choose a map to play</p>
+    <div class="map-cards">
+      <div class="map-card" data-map="squiggle">
+        <div class="map-thumb squiggle-thumb"></div>
+        <div class="map-info">
+          <span class="map-name">Squiggle</span>
+          <span class="map-diff easy">Easy</span>
+        </div>
+        <p class="map-desc">A winding path through open fields</p>
+      </div>
+      <div class="map-card locked" data-map="zigzag">
+        <div class="map-thumb zigzag-thumb"></div>
+        <div class="map-info">
+          <span class="map-name">Zigzag</span>
+          <span class="map-diff medium">Medium</span>
+        </div>
+        <p class="map-desc">Sharp turns and tight choke points</p>
+        <span class="lock-label">🔒 Beat Squiggle first</span>
+      </div>
+      <div class="map-card locked" data-map="split">
+        <div class="map-thumb split-thumb"></div>
+        <div class="map-info">
+          <span class="map-name">Split</span>
+          <span class="map-diff hard">Hard</span>
+        </div>
+        <p class="map-desc">The path forks — defend two fronts</p>
+        <span class="lock-label">🔒 Beat Zigzag first</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div id="screen-game" class="screen">
+  <div id="hud">
+    <div class="hud-left">
+      <a href="#" id="btn-menu-back" class="hud-btn">← Menu</a>
+      <span class="hud-item">💰 <span id="hud-gold">150</span></span>
+      <span class="hud-item">❤️ <span id="hud-lives">20</span></span>
+      <span class="hud-item">Wave <span id="hud-wave">0</span></span>
+    </div>
+    <div class="hud-right">
+      <button id="btn-pause" class="hud-btn">⏸ Pause</button>
+      <button id="btn-speed" class="hud-btn">⏩ 2x</button>
+      <button id="btn-wave" class="hud-btn wave-btn">▶ Start Wave</button>
+    </div>
+  </div>
+  <div id="game-area">
+    <canvas id="canvas"></canvas>
+    <div id="tower-panel">
+      <div class="panel-title">Towers</div>
+      <div id="tower-list"></div>
+      <div id="tower-info" class="hidden">
+        <div class="ti-name"></div>
+        <div class="ti-stats"></div>
+        <button class="ti-upgrade">Upgrade <span class="ti-upgrade-cost"></span></button>
+        <button class="ti-sell">Sell <span class="ti-sell-val"></span></button>
+      </div>
+    </div>
+  </div>
+  <div id="commentary-bar">
+    <span id="commentary-text"></span>
+  </div>
+</div>
+
+<div id="screen-over" class="screen">
+  <div class="over-inner">
+    <h2 id="over-title">Game Over</h2>
+    <p id="over-sub"></p>
+    <button id="btn-retry">Play Again</button>
+    <a href="#" id="btn-over-menu">← Menu</a>
+  </div>
+</div>
+
+<script src="main.js" type="module"></script>
+</body>
+</html>
