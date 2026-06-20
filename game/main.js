@@ -178,17 +178,25 @@ function draw() {
   drawParticles(ctx, state.particles);
 }
 
-function onMouseMove(e) {
+function getCanvasPos(e) {
   const r = state.canvas.getBoundingClientRect();
-  const mx = e.clientX - r.left, my = e.clientY - r.top;
-  state.hoverCol = Math.floor(mx / TILE);
-  state.hoverRow = Math.floor(my / TILE);
+  const scaleX = state.canvas.width / r.width;
+  const scaleY = state.canvas.height / r.height;
+  return {
+    x: (e.clientX - r.left) * scaleX,
+    y: (e.clientY - r.top) * scaleY
+  };
+}
+
+function onMouseMove(e) {
+  const {x, y} = getCanvasPos(e);
+  state.hoverCol = Math.floor(x / TILE);
+  state.hoverRow = Math.floor(y / TILE);
 }
 
 function onCanvasClick(e) {
-  const r = state.canvas.getBoundingClientRect();
-  const mx = e.clientX - r.left, my = e.clientY - r.top;
-  const col = Math.floor(mx / TILE), row = Math.floor(my / TILE);
+  const {x, y} = getCanvasPos(e);
+  const col = Math.floor(x / TILE), row = Math.floor(y / TILE);
 
   if (state.selectedType) {
     if (canPlace(col, row) && state.gold >= TOWER_DEFS[state.selectedType].cost) {
@@ -218,12 +226,30 @@ function canPlace(col, row) {
   return true;
 }
 
+function getTowerCost(type) {
+  const base = TOWER_DEFS[type].cost;
+  const inflation = 1 + Math.floor(state.waveNum / 3) * 0.08;
+  return Math.floor(base * inflation);
+}
+
+function updatePanelPrices() {
+  const list = document.getElementById('tower-list');
+  for (const btn of list.querySelectorAll('.tower-btn')) {
+    const type = btn.dataset.type;
+    const cost = getTowerCost(type);
+    btn.querySelector('.tower-btn-cost').textContent = '💰' + cost;
+    btn.classList.toggle('cant-afford', state.gold < cost);
+  }
+}
+
 function placeTower(col, row, type) {
+  const cost = getTowerCost(type);
+  if (state.gold < cost) return;
   const t = new Tower(col, row, type);
   state.towers.push(t);
-  state.gold -= TOWER_DEFS[type].cost;
+  state.gold -= cost;
   updateHUD(state.gold, state.lives, state.waveNum);
-  refreshTowerPanel(document.getElementById('tower-list'), state.selectedType, state.gold);
+  updatePanelPrices();
 }
 
 function upgradeTower(tower) {
