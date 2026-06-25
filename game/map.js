@@ -23,12 +23,14 @@ const MAPS = {
   split: {
     cols: 22,
     rows: 14,
-    path: [
+    pathUpper: [
       [0,7],[1,7],[2,7],[3,7],[4,7],[5,7],[6,7],[7,7],[8,7],[9,7],[10,7],
-      [11,6],[12,5],[13,4],[14,3],[15,3],[16,3],[17,3],[18,3],[19,3],[20,3],[21,3],
-      [11,8],[12,9],[13,10],[14,11],[15,11],[16,11],[17,11],[18,11],[19,11],[20,11],[21,11]
+      [11,6],[12,5],[13,4],[14,3],[15,3],[16,3],[17,3],[18,3],[19,3],[20,3],[21,3]
     ],
-    splitAt: 10
+    pathLower: [
+      [0,7],[1,7],[2,7],[3,7],[4,7],[5,7],[6,7],[7,7],[8,7],[9,7],[10,7],
+      [11,8],[12,9],[13,10],[14,11],[15,11],[16,11],[17,11],[18,11],[19,11],[20,11],[21,11]
+    ]
   }
 };
 
@@ -44,7 +46,16 @@ export function buildPathSet(path) {
 
 export function drawMap(ctx, mapName, W, H) {
   const map = MAPS[mapName];
-  const pathSet = buildPathSet(map.path);
+  let pathToUse = map.path;
+  
+  if (mapName === 'split') {
+    const combined = new Set();
+    for (const p of map.pathUpper) combined.add(`${p[0]},${p[1]}`);
+    for (const p of map.pathLower) combined.add(`${p[0]},${p[1]}`);
+    pathToUse = Array.from(combined).map(s => s.split(',').map(Number));
+  }
+  
+  const pathSet = buildPathSet(pathToUse);
 
   ctx.fillStyle = '#4a7c3f';
   ctx.fillRect(0, 0, W, H);
@@ -61,7 +72,8 @@ export function drawMap(ctx, mapName, W, H) {
     }
   }
 
-  for (const [c,r] of map.path) {
+  for (const coord of pathToUse) {
+    const [c, r] = Array.isArray(coord) ? coord : [parseInt(coord.split(',')[0]), parseInt(coord.split(',')[1])];
     ctx.fillStyle = '#c8a96e';
     ctx.fillRect(c * TILE, r * TILE, TILE, TILE);
     ctx.fillStyle = '#b89858';
