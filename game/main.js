@@ -13,20 +13,21 @@ function initGame(mapName) {
   canvas.width = W;
   canvas.height = H;
 
-  const pathSet = buildPathSet(map.path);
-
-  let path = map.path;
+  let pathSet;
+  let path = null;
   let path2 = null;
-  
-  if (map.splitAt !== undefined) {
-    const splitIdx = map.splitAt;
-    const totalLen = map.path.length;
-    const base = map.path.slice(0, splitIdx + 1);
-    const remaining = map.path.slice(splitIdx + 1);
-    const midPoint = Math.floor(remaining.length / 2);
+
+  if (mapName === 'split') {
+    path = map.pathUpper;
+    path2 = map.pathLower;
     
-    path = [...base, ...remaining.slice(0, midPoint)];
-    path2 = [...base, ...remaining.slice(midPoint)];
+    const combined = new Set();
+    for (const [c, r] of path) combined.add(`${c},${r}`);
+    for (const [c, r] of path2) combined.add(`${c},${r}`);
+    pathSet = combined;
+  } else {
+    path = map.path;
+    pathSet = buildPathSet(map.path);
   }
 
   state = {
