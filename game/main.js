@@ -17,18 +17,16 @@ function initGame(mapName) {
 
   let path = map.path;
   let path2 = null;
+  
   if (map.splitAt !== undefined) {
-    path = map.path.slice(0, map.splitAt + 1).concat(map.path.slice(map.splitAt + 1, map.path.length).filter((_, i) => {
-      const full = map.path.slice(map.splitAt + 1);
-      const idx = full.indexOf(map.path[map.splitAt + 1 + i]);
-      return true;
-    }));
     const splitIdx = map.splitAt;
+    const totalLen = map.path.length;
     const base = map.path.slice(0, splitIdx + 1);
-    const upper = map.path.slice(splitIdx + 1, map.path.length / 2 + splitIdx + 2);
-    const lower = map.path.slice(map.path.length / 2 + splitIdx + 1);
-    path = [...base, ...upper];
-    path2 = [...base, ...lower];
+    const remaining = map.path.slice(splitIdx + 1);
+    const midPoint = Math.floor(remaining.length / 2);
+    
+    path = [...base, ...remaining.slice(0, midPoint)];
+    path2 = [...base, ...remaining.slice(midPoint)];
   }
 
   state = {
@@ -51,12 +49,9 @@ function initGame(mapName) {
     waveNum: 0,
     mapCache: null,
     wave: null,
+    wave2: null,
     lastTime: null
   };
-
-  const splitPath = mapName === 'split'
-    ? (i) => i % 2 === 0 ? path : (path2 || path)
-    : () => path;
 
   state.wave = new WaveManager(mapName, path, (txt) => setCommentary(txt));
   if (mapName === 'split' && path2) {
