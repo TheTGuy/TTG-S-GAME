@@ -36,6 +36,7 @@ function initGame(mapName) {
     W, H,
     towers: [],
     enemies: [],
+    enemiesPath2: [],
     projectiles: [],
     particles: [],
     gold: 150,
@@ -103,7 +104,7 @@ function startWave() {
   if (state.wave2) {
     state.wave2.waveData = state.wave.waveData;
     state.wave2.waveNum = state.wave.waveNum;
-    state.wave2.startWave(state.enemies);
+    state.wave2.startWave(state.enemiesPath2);
   }
 }
 
@@ -120,7 +121,7 @@ function loop(ts) {
 function update(dt) {
   if (state.phase === 'wave') {
     state.wave.update(dt, state.enemies);
-    if (state.wave2) state.wave2.update(dt, state.enemies);
+    if (state.wave2) state.wave2.update(dt, state.enemiesPath2);
   }
 
   for (const e of state.enemies) {
@@ -133,8 +134,19 @@ function update(dt) {
     }
   }
 
+  for (const e of state.enemiesPath2) {
+    e.update(dt, state.enemiesPath2);
+    if (e.reached && !e.dead) {
+      e.dead = true;
+      state.lives--;
+      updateHUD(state.gold, state.lives, state.waveNum);
+      if (state.lives <= 0) { gameOver(); return; }
+    }
+  }
+
   for (const t of state.towers) {
-    t.update(dt, state.enemies, state.projectiles);
+    const allEnemies = [...state.enemies, ...state.enemiesPath2];
+    t.update(dt, allEnemies, state.projectiles);
   }
 
   updateProjectiles(state.projectiles, state.enemies, state.particles, (enemy) => {
@@ -143,11 +155,20 @@ function update(dt) {
     refreshTowerPanel(document.getElementById('tower-list'), state.selectedType, state.gold);
   });
 
+  updateProjectiles(state.projectiles, state.enemiesPath2, state.particles, (enemy) => {
+    state.gold += enemy.reward;
+    updateHUD(state.gold, state.lives, state.waveNum);
+    refreshTowerPanel(document.getElementById('tower-list'), state.selectedType, state.gold);
+  });
+
   updateParticles(state.particles, dt);
 
   state.enemies = state.enemies.filter(e => !e.dead || e.hp > 0);
+  state.enemiesPath2 = state.enemiesPath2.filter(e => !e.dead || e.hp > 0);
 
-  if (state.phase === 'wave' && state.wave.isWaveComplete(state.enemies)) {
+  const allEnemiesDone = state.wave.isWaveComplete(state.enemies) && (!state.wave2 || state.wave2.isWaveComplete(state.enemiesPath2));
+  
+  if (state.phase === 'wave' && allEnemiesDone) {
     state.phase = 'prep';
     state.waveNum = state.wave.waveNum;
     updateHUD(state.gold, state.lives, state.waveNum);
@@ -170,6 +191,7 @@ function draw() {
 
   for (const t of state.towers) t.draw(ctx, t === state.selectedTower);
   for (const e of state.enemies) e.draw(ctx);
+  for (const e of state.enemiesPath2) e.draw(ctx);
   drawProjectiles(ctx, state.projectiles);
   drawParticles(ctx, state.particles);
 }
